@@ -1,10 +1,13 @@
 package com.workledger.core.timesheet.domain;
 
+import com.workledger.core.common.exception.InvalidStateException;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Data
 @Entity
 @Table(name = "work_entries")
 public class WorkEntry {
@@ -48,5 +51,38 @@ public class WorkEntry {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public boolean canModify() {
+        if(this.workEntryStatus == WorkEntryStatus.LOCKED) {
+            throw new InvalidStateException(
+                    "Cannot modify work entry in LOCKED status",
+                    workEntryStatus.name(),
+                    "DRAFT or SUBMITTED"
+            );
+        }
+        return true;
+    }
+
+    public void submit() {
+        if(workEntryStatus != WorkEntryStatus.DRAFT) {
+            throw new InvalidStateException(
+                    "Only DRAFT work entries can be submitted",
+                    workEntryStatus.name(),
+                    WorkEntryStatus.DRAFT.name()
+            );
+        }
+        this.workEntryStatus = WorkEntryStatus.SUBMITTED;
+    }
+
+    public void lock() {
+        if(workEntryStatus != WorkEntryStatus.SUBMITTED) {
+            throw new InvalidStateException(
+                    "Only SUBMITTED work entries can be locked",
+                    workEntryStatus.name(),
+                    WorkEntryStatus.DRAFT.name()
+            );
+        }
+        this.workEntryStatus = WorkEntryStatus.LOCKED;
     }
 }
