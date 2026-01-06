@@ -160,13 +160,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
 
         WorkEntry workEntry = findWorkEntryById(id);
 
-        if(workEntry.getWorkEntryStatus() == WorkEntryStatus.LOCKED) {
-            throw new InvalidStateException(
-                    "Cannot delete work entry in LOCKED status",
-                    workEntry.getWorkEntryStatus().name(),
-                    "DRAFT or SUBMITTED"
-            );
-        }
+        workEntry.canModify();
 
         workEntryRepository.delete(workEntry);
         log.info("Successfully deleted work entry with id: {}", id);
