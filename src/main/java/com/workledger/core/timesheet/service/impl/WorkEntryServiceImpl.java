@@ -1,7 +1,6 @@
 package com.workledger.core.timesheet.service.impl;
 
 import com.workledger.core.common.exception.BusinessValidationException;
-import com.workledger.core.common.exception.InvalidStateException;
 import com.workledger.core.common.exception.ResourceNotFoundException;
 import com.workledger.core.timesheet.domain.WorkEntry;
 import com.workledger.core.timesheet.domain.WorkEntryStatus;
@@ -40,6 +39,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
 
     @Override
     public WorkEntryResponse createWorkEntry(CreateWorkEntryRequest request) {
+        requireNonNull(request, "CreateWorkEntryRequest must not be null");
         log.debug("Creating work entry: {}", request);
         validateWorkEntryRequest(request.workDate(), request.hoursSpent());
 
@@ -57,18 +57,12 @@ public class WorkEntryServiceImpl implements WorkEntryService {
 
     @Override
     public WorkEntryResponse updateWorkEntry(Long id, UpdateWorkEntryRequest request) {
+        requireNonNull(request, "UpdateWorkEntryRequest must not be null");
         log.debug("Updating work entry with id: {}", id);
+        validateWorkEntryRequest(request.workDate(), request.hoursSpent());
 
         WorkEntry workEntry = findWorkEntryById(id);
-
         workEntry.canModify();
-
-        if(request.hoursSpent() != null) {
-            validateHoursSpent(request.hoursSpent());
-        }
-        if(request.workDate() != null) {
-            validateWorkDate(request.workDate());
-        }
 
         workEntryMapper.updateEntityFromRequest(request, workEntry);
         WorkEntry updatedEntry = workEntryRepository.save(workEntry);
@@ -90,6 +84,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     @Transactional(readOnly = true)
     public Page<WorkEntrySummary> getAllWorkEntries(Pageable pageable) {
         log.debug("Fetching all work entries with pagination: {}", pageable);
+        validatePaginationParams(pageable.getPageNumber(), pageable.getPageSize());
 
         Page<WorkEntry> workEntries = workEntryRepository.findAll(pageable);
         return workEntries.map(workEntryMapper::toSummary);
@@ -99,7 +94,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     @Transactional(readOnly = true)
     public Page<WorkEntrySummary> getWorkEntriesByDateRange(LocalDate startDate, LocalDate endDate, Pageable pageable) {
         log.debug("Fetching work entries between {} and {}", startDate, endDate);
-
+        validatePaginationParams(pageable.getPageNumber(), pageable.getPageSize());
         if(startDate.isAfter(endDate)) {
             throw new BusinessValidationException("Start date cannot be after end date");
         }
@@ -187,6 +182,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
 
     // Private helper methods
     private WorkEntry findWorkEntryById(Long id) {
+        requireNonNull(id, "Work entry id must not be null");
         return workEntryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "WorkEntry", "id", id
@@ -194,8 +190,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     private void validateWorkEntryRequest(LocalDate workDate, Double hoursSpent) {
-        validateNotFutureDate(workDate, "Work Date");
+        validateWorkDate(workDate);
         validateHoursSpent(hoursSpent);
-
     }
 }

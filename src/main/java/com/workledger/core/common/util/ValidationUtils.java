@@ -48,7 +48,6 @@ public class ValidationUtils {
 
     public static void validateNotFutureDate(LocalDate date, String fieldName) {
         requireNonNull(date, fieldName);
-
         if(date.isAfter(LocalDate.now())) {
             throw new BusinessValidationException(fieldName + " cannot be in the future");
         }
@@ -56,9 +55,9 @@ public class ValidationUtils {
 
     public static void validateNotPastDate(LocalDate date, String fieldName) {
         requireNonNull(date, fieldName);
-
-        if(date.isBefore(LocalDate.now())) {
-            throw new BusinessValidationException(fieldName + " cannot be in the past");
+        LocalDate cutoffDate = LocalDate.now().minusDays(60);
+        if(date.isBefore(cutoffDate)) {
+            throw new BusinessValidationException(fieldName + " cannot be older than 60 days");
         }
     }
 
@@ -89,11 +88,7 @@ public class ValidationUtils {
     public static void validateWorkDate(LocalDate workDate) {
         requireNonNull(workDate, "Work Date");
         validateNotFutureDate(workDate, "Work Date");
-
-        LocalDate cutoffDate = LocalDate.now().minusDays(60);
-        if(workDate.isBefore(cutoffDate)) {
-            throw new BusinessValidationException("Work date cannot be older than 60 days");
-        }
+        validateNotPastDate(workDate, "Work Date");
     }
 
     public static void validateEmail(String email) {
@@ -125,9 +120,6 @@ public class ValidationUtils {
     }
 
     public static void validatePaginationParams(int page, int size) {
-        if(page < 0) {
-            throw new BusinessValidationException("Page number cannot be negative");
-        }
         if(size <= 0) {
             throw new BusinessValidationException("Page size must be positive");
         }
@@ -146,7 +138,7 @@ public class ValidationUtils {
     }
 
     /**
-     * Validates that at least on field in update request is non-null
+     * Validates that at least one field in update request is non-null
      */
     public static void requireAtLeastOneNonNull(String message, Object... values) {
         for(Object value : values) {
