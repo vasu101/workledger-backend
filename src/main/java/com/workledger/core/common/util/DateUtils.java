@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 
 /**
- * Utility class for dte and time operations.
+ * Utility class for date and time operations.
  * Provides common date calculations and formatting for the WorkLedger application.
  */
 public class DateUtils {
