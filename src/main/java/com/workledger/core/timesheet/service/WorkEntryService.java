@@ -118,13 +118,4 @@ public interface WorkEntryService {
      * @return total hours spent
      */
     Double calculateTotalHours(LocalDate statDate, LocalDate endDate);
-
-    /**
-     * Validates ifa work entry can be modified.
-     *
-     * @param id the work entry identifier
-     * @return true if the work entry can be modified, false otherwise
-     * @throws com.workledger.core.common.exception.ResourceNotFoundException if work entry not found
-     */
-    boolean canModifyWorkEntry(Long id);
 }
