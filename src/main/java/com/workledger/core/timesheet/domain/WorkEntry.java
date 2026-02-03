@@ -53,7 +53,7 @@ public class WorkEntry {
         updatedAt = LocalDateTime.now();
     }
 
-    public boolean canModify() {
+    public void canModify() {
         if(this.workEntryStatus == WorkEntryStatus.LOCKED) {
             throw new InvalidStateException(
                     "Cannot modify work entry in LOCKED status",
@@ -61,7 +61,6 @@ public class WorkEntry {
                     "DRAFT or SUBMITTED"
             );
         }
-        return true;
     }
 
     public void submit() {
