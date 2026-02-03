@@ -74,7 +74,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     @Override
     @Transactional(readOnly = true)
     public WorkEntryResponse getWorkEntryById(Long id) {
-        log.debug("Fetching wor entry with id: {}", id);
+        log.debug("Fetching work entry with id: {}", id);
 
         WorkEntry workEntry = findWorkEntryById(id);
         return workEntryMapper.toResponse(workEntry);
@@ -107,6 +107,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     @Transactional(readOnly = true)
     public Page<WorkEntrySummary> getWorkEntriesByStatus(WorkEntryStatus workEntryStatus, Pageable pageable) {
         log.debug("Fetching work entries with status: {}", workEntryStatus);
+        validatePaginationParams(pageable.getPageNumber(), pageable.getPageSize());
 
         Page<WorkEntry> workEntries = workEntryRepository.findByWorkEntryStatus(workEntryStatus, pageable);
         return workEntries.map(workEntryMapper::toSummary);
@@ -116,6 +117,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     @Transactional(readOnly = true)
     public List<WorkEntrySummary> getWorkEntriesByDate(LocalDate workDate) {
         log.debug("Fetching work entries for date: {}", workDate);
+        requireNonNull(workDate, "Work Date");
 
         List<WorkEntry> workEntries = workEntryRepository.findByWorkDate(workDate);
         return workEntries.stream()
@@ -145,6 +147,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
 
         workEntry.lock();
         WorkEntry updatedEntry = workEntryRepository.save(workEntry);
+
         log.info("Successfully locked work entry with id: {}", id);
         return workEntryMapper.toResponse(updatedEntry);
     }
@@ -158,6 +161,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
         workEntry.canModify();
 
         workEntryRepository.delete(workEntry);
+
         log.info("Successfully deleted work entry with id: {}", id);
     }
 
@@ -173,16 +177,9 @@ public class WorkEntryServiceImpl implements WorkEntryService {
         return totalHours != null ? totalHours : 0.0;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean canModifyWorkEntry(Long id) {
-        WorkEntry workEntry = findWorkEntryById(id);
-        return workEntry.canModify();
-    }
-
     // Private helper methods
     private WorkEntry findWorkEntryById(Long id) {
-        requireNonNull(id, "Work entry id must not be null");
+        requireNonNull(id, "Work entry id");
         return workEntryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "WorkEntry", "id", id
