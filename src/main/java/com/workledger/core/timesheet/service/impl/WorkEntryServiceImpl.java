@@ -38,6 +38,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     private final WorkEntryMapper workEntryMapper;
 
     @Override
+    @Transactional
     public WorkEntryResponse createWorkEntry(CreateWorkEntryRequest request) {
         requireNonNull(request, "CreateWorkEntryRequest must not be null");
         log.debug("Creating work entry: {}", request);
@@ -56,6 +57,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
+    @Transactional
     public WorkEntryResponse updateWorkEntry(Long id, UpdateWorkEntryRequest request) {
         requireNonNull(request, "UpdateWorkEntryRequest must not be null");
         log.debug("Updating work entry with id: {}", id);
@@ -72,7 +74,6 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public WorkEntryResponse getWorkEntryById(Long id) {
         log.debug("Fetching work entry with id: {}", id);
 
@@ -81,7 +82,6 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<WorkEntrySummary> getAllWorkEntries(Pageable pageable) {
         log.debug("Fetching all work entries with pagination: {}", pageable);
         validatePaginationParams(pageable.getPageNumber(), pageable.getPageSize());
@@ -91,7 +91,6 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<WorkEntrySummary> getWorkEntriesByDateRange(LocalDate startDate, LocalDate endDate, Pageable pageable) {
         log.debug("Fetching work entries between {} and {}", startDate, endDate);
         validatePaginationParams(pageable.getPageNumber(), pageable.getPageSize());
@@ -104,7 +103,6 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<WorkEntrySummary> getWorkEntriesByStatus(WorkEntryStatus workEntryStatus, Pageable pageable) {
         log.debug("Fetching work entries with status: {}", workEntryStatus);
         validatePaginationParams(pageable.getPageNumber(), pageable.getPageSize());
@@ -114,7 +112,6 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<WorkEntrySummary> getWorkEntriesByDate(LocalDate workDate) {
         log.debug("Fetching work entries for date: {}", workDate);
         requireNonNull(workDate, "Work Date");
@@ -126,6 +123,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
+    @Transactional
     public WorkEntryResponse submitWorkEntry(Long id) {
         log.debug("Submitting work entry for id: {}", id);
 
@@ -140,6 +138,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
+    @Transactional
     public WorkEntryResponse lockWorkEntry(Long id) {
         log.debug("Locking work entry with id: {}", id);
 
@@ -153,6 +152,7 @@ public class WorkEntryServiceImpl implements WorkEntryService {
     }
 
     @Override
+    @Transactional
     public void deleteWorkEntry(Long id) {
         log.debug("Deleting work entry with id: {}", id);
 
