@@ -27,7 +27,4 @@ public record UpdateWorkEntryRequest(
         Double hoursSpent,
 
         WorkEntryStatus workEntryStatus
-
-
-) {
-}
+) { }
